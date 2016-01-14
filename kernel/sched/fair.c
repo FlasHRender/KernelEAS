@@ -4978,6 +4978,17 @@ boosted_cpu_util(int cpu)
 	return util + margin;
 }
 
+static inline unsigned long
+boosted_task_util(struct task_struct *task)
+{
+	unsigned long util = task_util(task);
+	unsigned long margin = schedtune_task_margin(task);
+
+	trace_sched_boost_task(task, util, margin);
+
+	return util + margin;
+}
+
 /*
  * find_idlest_group finds and returns the least busy CPU group within the
  * domain.
