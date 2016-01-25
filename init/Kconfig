@@ -1181,6 +1181,7 @@ config DEBUG_BLK_CGROUP
 
 endif # CGROUPS
 
+<<<<<<< HEAD
 config SCHED_HMP
 	bool "Scheduler support for heterogenous multi-processor systems"
 	depends on SMP && FAIR_GROUP_SCHED
@@ -1217,6 +1218,8 @@ config SCHED_QHMP
 	  packing knobs and energy-aware task placements and load
 	  balancing.
 
+=======
+>>>>>>> a5ef960dee32... sched: Revert HMP and some MSM specific features
 config CHECKPOINT_RESTORE
 	bool "Checkpoint/restore support" if EXPERT
 	default n
