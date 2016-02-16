@@ -5138,7 +5138,7 @@ schedtune_cpu_margin(unsigned long util, int cpu)
 static inline unsigned long
 boosted_cpu_util(int cpu)
 {
-	unsigned long util = cpu_util(cpu, UTIL_AVG);
+	unsigned long util = cpu_util(cpu, UTIL_EST);
 	unsigned long margin = schedtune_cpu_margin(util, cpu);
 
 	trace_sched_boost_cpu(cpu, util, margin);
