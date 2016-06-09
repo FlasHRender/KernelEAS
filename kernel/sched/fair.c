@@ -6085,16 +6085,12 @@ static inline int find_best_target(struct task_struct *p, bool boosted, bool pre
 	if (target_cpu < 0)
 		target_cpu = best_idle_cpu >= 0 ? best_idle_cpu : backup_cpu;
 
-<<<<<<< HEAD
-	return boosted ? rd->max_cap_orig_cpu : rd->min_cap_orig_cpu;
-=======
 	if (target_cpu >= 0) {
 		schedstat_inc(p, se.statistics.nr_wakeups_fbt_count);
 		schedstat_inc(this_rq(), eas_stats.fbt_count);
 	}
 
 	return target_cpu;
->>>>>>> f617139ac34f... Experimental!: sched/fair: Add eas (& cas) specific rq, sd and task stats
 }
 
 /*
@@ -9820,8 +9816,10 @@ int alloc_fair_sched_group(struct task_group *tg, struct task_group *parent)
 		init_cfs_rq(cfs_rq);
 		init_tg_cfs_entry(tg, cfs_rq, se, i, parent->se[i]);
 		init_entity_runnable_average(se);
-		post_init_entity_util_avg(se);
 
+		raw_spin_lock_irq(&rq->lock);
+		post_init_entity_util_avg(se);
+		raw_spin_unlock_irq(&rq->lock);
 	}
 
 	return 1;
