@@ -5976,12 +5976,46 @@ static int cpu_util_wake(int cpu, struct task_struct *p)
 	capacity = capacity_orig_of(cpu);
 	util = max_t(long, cpu_util(cpu) - task_util(p), 0);
 
-	return (util >= capacity) ? capacity : util;
-}
+		cur_capacity = capacity_curr_of(i);
+		rq = cpu_rq(i);
+		idle_idx = idle_get_state_idx(rq);
 
-static int start_cpu(bool boosted)
-{
-	struct root_domain *rd = cpu_rq(smp_processor_id())->rd;
+		if (new_util < cur_capacity) {
+			if (cpu_rq(i)->nr_running) {
+				if (prefer_idle) {
+					/* Find a target cpu with highest
+					 * utilization.
+					 */
+					if (target_util == 0 ||
+						target_util < new_util) {
+						target_cpu = i;
+						target_util = new_util;
+					}
+				} else {
+					/* Find a target cpu with lowest
+					 * utilization.
+					 */
+					if (target_util == 0 ||
+						target_util > new_util) {
+						target_cpu = i;
+						target_util = new_util;
+					}
+				}
+			} else if (!prefer_idle) {
+				if (best_idle_cpu < 0 ||
+					(sysctl_sched_cstate_aware &&
+					 	best_idle_cstate > idle_idx)) {
+					best_idle_cstate = idle_idx;
+					best_idle_cpu = i;
+				}
+			}
+		} else if (backup_capacity == 0 ||
+				backup_capacity > cur_capacity) {
+			// Find a backup cpu with least capacity.
+			backup_capacity = cur_capacity;
+			backup_cpu = i;
+		}
+	}
 
 	rcu_lockdep_assert(rcu_read_lock_sched_held(),
 			   "sched RCU must be held");
