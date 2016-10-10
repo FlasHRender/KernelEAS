@@ -116,7 +116,7 @@ static void binder_insert_allocated_buffer_locked(
 	rb_insert_color(&new_buffer->rb_node, &alloc->allocated_buffers);
 }
 
-static struct binder_buffer *binder_alloc_prepare_to_free_locked(
+static struct binder_buffer *binder_alloc_buffer_lookup_locked(
 		struct binder_alloc *alloc,
 		uintptr_t user_ptr)
 {
@@ -135,19 +135,8 @@ static struct binder_buffer *binder_alloc_prepare_to_free_locked(
 			n = n->rb_left;
 		else if (kern_ptr > buffer)
 			n = n->rb_right;
-		else {
-			/*
-			 * Guard against user threads attempting to
-			 * free the buffer twice
-			 */
-			if (buffer->free_in_progress) {
-				pr_err("%d:%d FREE_BUFFER u%016llx user freed buffer twice\n",
-				       alloc->pid, current->pid, (u64)user_ptr);
-				return NULL;
-			}
-			buffer->free_in_progress = 1;
+		else
 			return buffer;
-		}
 	}
 	return NULL;
 }
@@ -163,13 +152,13 @@ static struct binder_buffer *binder_alloc_prepare_to_free_locked(
  *
  * Return:	Pointer to buffer or NULL
  */
-struct binder_buffer *binder_alloc_prepare_to_free(struct binder_alloc *alloc,
-						   uintptr_t user_ptr)
+struct binder_buffer *binder_alloc_buffer_lookup(struct binder_alloc *alloc,
+						 uintptr_t user_ptr)
 {
 	struct binder_buffer *buffer;
 
 	mutex_lock(&alloc->mutex);
-	buffer = binder_alloc_prepare_to_free_locked(alloc, user_ptr);
+	buffer = binder_alloc_buffer_lookup_locked(alloc, user_ptr);
 	mutex_unlock(&alloc->mutex);
 	return buffer;
 }
@@ -273,7 +262,7 @@ err_no_vma:
 		up_write(&mm->mmap_sem);
 		mmput(mm);
 	}
-	return vma ? -ENOMEM : -ESRCH;
+	return -ENOMEM;
 }
 
 struct binder_buffer *binder_alloc_new_buf_locked(struct binder_alloc *alloc,
@@ -289,12 +278,11 @@ struct binder_buffer *binder_alloc_new_buf_locked(struct binder_alloc *alloc,
 	void *has_page_addr;
 	void *end_page_addr;
 	size_t size, data_offsets_size;
-	int ret;
 
 	if (alloc->vma == NULL) {
 		pr_err("%d: binder_alloc_buf, no vma\n",
 		       alloc->pid);
-		return ERR_PTR(-ESRCH);
+		return NULL;
 	}
 
 	data_offsets_size = ALIGN(data_size, sizeof(void *)) +
@@ -304,21 +292,21 @@ struct binder_buffer *binder_alloc_new_buf_locked(struct binder_alloc *alloc,
 		binder_alloc_debug(BINDER_DEBUG_BUFFER_ALLOC,
 				"%d: got transaction with invalid size %zd-%zd\n",
 				alloc->pid, data_size, offsets_size);
-		return ERR_PTR(-EINVAL);
+		return NULL;
 	}
 	size = data_offsets_size + ALIGN(extra_buffers_size, sizeof(void *));
 	if (size < data_offsets_size || size < extra_buffers_size) {
 		binder_alloc_debug(BINDER_DEBUG_BUFFER_ALLOC,
 				"%d: got transaction with invalid extra_buffers_size %zd\n",
 				alloc->pid, extra_buffers_size);
-		return ERR_PTR(-EINVAL);
+		return NULL;
 	}
 	if (is_async &&
 	    alloc->free_async_space < size + sizeof(struct binder_buffer)) {
 		binder_alloc_debug(BINDER_DEBUG_BUFFER_ALLOC,
 			     "%d: binder_alloc_buf size %zd failed, no async space left\n",
 			      alloc->pid, size);
-		return ERR_PTR(-ENOSPC);
+		return NULL;
 	}
 
 	while (n) {
@@ -337,37 +325,9 @@ struct binder_buffer *binder_alloc_new_buf_locked(struct binder_alloc *alloc,
 		}
 	}
 	if (best_fit == NULL) {
-		size_t allocated_buffers = 0;
-		size_t largest_alloc_size = 0;
-		size_t total_alloc_size = 0;
-		size_t free_buffers = 0;
-		size_t largest_free_size = 0;
-		size_t total_free_size = 0;
-
-		for (n = rb_first(&alloc->allocated_buffers); n != NULL;
-		     n = rb_next(n)) {
-			buffer = rb_entry(n, struct binder_buffer, rb_node);
-			buffer_size = binder_alloc_buffer_size(alloc, buffer);
-			allocated_buffers++;
-			total_alloc_size += buffer_size;
-			if (buffer_size > largest_alloc_size)
-				largest_alloc_size = buffer_size;
-		}
-		for (n = rb_first(&alloc->free_buffers); n != NULL;
-		     n = rb_next(n)) {
-			buffer = rb_entry(n, struct binder_buffer, rb_node);
-			buffer_size = binder_alloc_buffer_size(alloc, buffer);
-			free_buffers++;
-			total_free_size += buffer_size;
-			if (buffer_size > largest_free_size)
-				largest_free_size = buffer_size;
-		}
 		pr_err("%d: binder_alloc_buf size %zd failed, no address space\n",
 			alloc->pid, size);
-		pr_err("allocated: %zd (num: %zd largest: %zd), free: %zd (num: %zd largest: %zd)\n",
-		       total_alloc_size, allocated_buffers, largest_alloc_size,
-		       total_free_size, free_buffers, largest_free_size);
-		return ERR_PTR(-ENOSPC);
+		return NULL;
 	}
 	if (n == NULL) {
 		buffer = rb_entry(best_fit, struct binder_buffer, rb_node);
@@ -390,14 +350,12 @@ struct binder_buffer *binder_alloc_new_buf_locked(struct binder_alloc *alloc,
 		(void *)PAGE_ALIGN((uintptr_t)buffer->data + buffer_size);
 	if (end_page_addr > has_page_addr)
 		end_page_addr = has_page_addr;
-	ret = binder_update_page_range(alloc, 1,
-	    (void *)PAGE_ALIGN((uintptr_t)buffer->data), end_page_addr, NULL);
-	if (ret)
-		return ERR_PTR(ret);
+	if (binder_update_page_range(alloc, 1,
+	    (void *)PAGE_ALIGN((uintptr_t)buffer->data), end_page_addr, NULL))
+		return NULL;
 
 	rb_erase(best_fit, &alloc->free_buffers);
 	buffer->free = 0;
-	buffer->free_in_progress = 0;
 	binder_insert_allocated_buffer_locked(alloc, buffer);
 	if (buffer_size != size) {
 		struct binder_buffer *new_buffer = (void *)buffer->data + size;
@@ -726,10 +684,9 @@ void binder_alloc_deferred_release(struct binder_alloc *alloc)
 static void print_binder_buffer(struct seq_file *m, const char *prefix,
 				struct binder_buffer *buffer)
 {
-	seq_printf(m, "%s %d: %pK size %zd:%zd:%zd %s\n",
+	seq_printf(m, "%s %d: %pK size %zd:%zd %s\n",
 		   prefix, buffer->debug_id, buffer->data,
 		   buffer->data_size, buffer->offsets_size,
-		   buffer->extra_buffers_size,
 		   buffer->transaction ? "active" : "delivered");
 }
 
@@ -799,4 +756,3 @@ void binder_alloc_init(struct binder_alloc *alloc)
 	alloc->pid = current->group_leader->pid;
 	mutex_init(&alloc->mutex);
 }
-
