@@ -3230,6 +3230,7 @@ enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 	 */
 	update_curr(cfs_rq);
 	update_load_avg(se, UPDATE_TG);
+	update_cfs_shares(se);
 	enqueue_entity_load_avg(cfs_rq, se);
 	account_entity_enqueue(cfs_rq, se);
 
@@ -3512,7 +3513,7 @@ entity_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr, int queued)
 	 * Ensure that runnable average is periodically updated.
 	 */
 	update_load_avg(curr, UPDATE_TG);
-	update_cfs_shares(cfs_rq);
+	update_cfs_shares(curr);
 
 #ifdef CONFIG_SCHED_HRTICK
 	/*
@@ -4437,7 +4438,7 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 			break;
 
 		update_load_avg(se, UPDATE_TG);
-		update_cfs_shares(cfs_rq);
+		update_cfs_shares(se);
 	}
 
 	if (!se)
@@ -4544,7 +4545,7 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 			break;
 
 		update_load_avg(se, UPDATE_TG);
-		update_cfs_shares(cfs_rq);
+		update_cfs_shares(se);
 	}
 
 	if (!se)
