@@ -5384,6 +5384,7 @@ static inline int
 normalize_energy(int energy_diff)
 {
 	u32 normalized_nrg;
+
 	/* during early setup, we don't know the extents */
 	if (unlikely(!schedtune_initialized))
 		return energy_diff < 0 ? -1 : 1 ;
