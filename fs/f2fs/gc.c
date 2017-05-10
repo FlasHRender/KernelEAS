@@ -625,7 +625,7 @@ static void move_encrypted_block(struct inode *inode, block_t bidx)
 
 	fio.rw = WRITE_SYNC;
 	fio.new_blkaddr = newaddr;
-	f2fs_submit_page_mbio(&fio);
+	f2fs_submit_page_write(&fio);
 
 	f2fs_update_data_blkaddr(&dn, newaddr);
 	set_inode_flag(inode, FI_APPEND_WRITE);
@@ -881,8 +881,8 @@ next:
 	}
 
 	if (gc_type == FG_GC)
-		f2fs_submit_merged_bio(sbi,
-				(type == SUM_TYPE_NODE) ? NODE : DATA, WRITE);
+		f2fs_submit_merged_write(sbi,
+				(type == SUM_TYPE_NODE) ? NODE : DATA);
 
 	blk_finish_plug(&plug);
 
