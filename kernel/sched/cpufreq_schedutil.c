@@ -627,7 +627,7 @@ static void store_tunables_data(struct sugov_tunables *tunables,
 		return;
 	ptunables->up_rate_limit_us = tunables->up_rate_limit_us;
 	ptunables->down_rate_limit_us = tunables->down_rate_limit_us;
-	ptunables->iowait_boost_enable = tunables->iowait_boost_enable; 
+	ptunables->iowait_boost_enable = tunables->iowait_boost_enable;
 
 	pr_debug("tunables data saved for cpu[%u]\n", cpu);
 }
@@ -659,7 +659,7 @@ initialize:
 		tunables->up_rate_limit_us *= lat;
 		tunables->down_rate_limit_us *= lat;
 	}
-	
+
 	pr_debug("tunables data initialized for cpu[%u]\n", cpu);
 out:
 	return;
@@ -706,9 +706,9 @@ static int sugov_init(struct cpufreq_policy *policy)
 		ret = -ENOMEM;
 		goto stop_kthread;
 	}
-	
+
 	get_tunables_data(tunables, policy);
-	
+
 	policy->governor_data = sg_policy;
 	sg_policy->tunables = tunables;
 
@@ -748,7 +748,7 @@ static int sugov_exit(struct cpufreq_policy *policy)
 	unsigned int count;
 
 	mutex_lock(&global_tunables_lock);
-	
+
 	store_tunables_data(sg_policy->tunables, policy);
 	count = gov_attr_set_put(&tunables->attr_set, &sg_policy->tunables_hook);
 	policy->governor_data = NULL;
@@ -756,7 +756,7 @@ static int sugov_exit(struct cpufreq_policy *policy)
 		sugov_tunables_free(tunables);
 
 	mutex_unlock(&global_tunables_lock);
-	
+
 	sugov_kthread_stop(sg_policy);
 	sugov_policy_free(sg_policy);
 
@@ -785,12 +785,19 @@ static int sugov_start(struct cpufreq_policy *policy)
 
 		memset(sg_cpu, 0, sizeof(*sg_cpu));
 		sg_cpu->sg_policy = sg_policy;
-		sg_cpu->flags = SCHED_CPUFREQ_DL;
-		sg_cpu->iowait_boost_max = policy->cpuinfo.max_freq;
-		cpufreq_add_update_util_hook(cpu, &sg_cpu->update_util,
-					     policy_is_shared(policy) ?
-							sugov_update_shared :
-							sugov_update_single);
+		if (policy_is_shared(policy)) {
+			sg_cpu->util = 0;
+			sg_cpu->max = 0;
+			sg_cpu->flags = SCHED_CPUFREQ_DL;
+			sg_cpu->last_update = 0;
+			sg_cpu->iowait_boost = 0;
+			sg_cpu->iowait_boost_max = policy->cpuinfo.max_freq;
+			cpufreq_add_update_util_hook(cpu, &sg_cpu->update_util,
+						     sugov_update_shared);
+		} else {
+			cpufreq_add_update_util_hook(cpu, &sg_cpu->update_util,
+						     sugov_update_single);
+		}
 	}
 	return 0;
 }
