@@ -117,7 +117,25 @@ struct f2fs_mount_info {
 #define F2FS_SET_FEATURE(sb, mask)					\
 	F2FS_SB(sb)->raw_super->feature |= cpu_to_le32(mask)
 #define F2FS_CLEAR_FEATURE(sb, mask)					\
-	F2FS_SB(sb)->raw_super->feature &= ~cpu_to_le32(mask)
+	(F2FS_SB(sb)->raw_super->feature &= ~cpu_to_le32(mask))
+
+/* bio stuffs */
+#define REQ_OP_READ	READ
+#define REQ_OP_WRITE	WRITE
+#define bio_op(bio)	((bio)->bi_rw & 1)
+
+static inline void bio_set_op_attrs(struct bio *bio, unsigned op,
+		unsigned op_flags)
+{
+	bio->bi_rw = op | op_flags;
+}
+
+static inline int wbc_to_write_flags(struct writeback_control *wbc)
+{
+	if (wbc->sync_mode == WB_SYNC_ALL)
+		return WRITE_SYNC;
+	return 0;
+}
 
 static inline void inode_lock(struct inode *inode)
 {
@@ -142,9 +160,9 @@ static inline void inode_unlock(struct inode *inode)
  *
  * Please refer to the comment for waitqueue_active.
  */
-static inline bool wq_has_sleeper(wait_queue_head_t *wq) 
+static inline bool wq_has_sleeper(wait_queue_head_t *wq)
 {
-	/*   
+	/*
 	 * We need to be sure we are in sync with the
 	 * add_wait_queue modifications to the wait queue.
 	 *
