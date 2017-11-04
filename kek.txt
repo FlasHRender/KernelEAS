@@ -1,0 +1,307 @@
+4f82331 Linux 3.18.79
+5560a1c ecryptfs: fix dereference of NULL user_key_payload
+56621bc can: kvaser_usb: Correct return value in printout
+7242605 scsi: sg: Re-fix off by one in sg_fill_request_table()
+16c847d scsi: zfcp: fix erp_action use-before-initialize in REC action trace
+38dc93f assoc_array: Fix a buggy node-splitting case
+9c73743 Input: gtco - fix potential out-of-bound access
+b7be20b0 fuse: fix READDIRPLUS skipping an entry
+458a78a spi: uapi: spidev: add missing ioctl header
+aaa7d1a usb: xhci: Handle error condition in xhci_stop_device()
+55d4aa1 ceph: unlock dangling spinlock in try_flush_caps()
+b44ef85 Linux 3.18.78
+114dff8 FS-Cache: fix dereference of NULL user_key_payload
+3811861 af_packet: don't pass empty blocks for PACKET_V3
+9a88356 parisc: Fix double-word compare and exchange in LWS code on 32-bit kernels
+e967f75 parisc: Avoid trashing sr2 and sr3 in LWS code
+9918b51 cls_api.c: Fix dumping of non-existing actions' stats.
+98c4e5c KEYS: don't let add_key() update an uninstantiated key
+f6a2c3d lib/digsig: fix dereference of NULL user_key_payload
+400f063 KEYS: encrypted: fix dereference of NULL user_key_payload
+20f5c5d bus: mbus: fix window size calculation for 4GB windows
+c47889a brcmsmac: make some local variables 'static const' to reduce stack size
+d35801d i2c: ismt: Separate I2C block read from SMBus block read
+e2c0ddb ALSA: hda: Remove superfluous '-' added by printk conversion
+38b4634 ALSA: seq: Enable 'use' locking in all configurations
+34b9ecf can: esd_usb2: Fix can_dlc value for received RTR, frames
+405c43c can: gs_usb: fix busy loop if no more TX context is available
+e9aeba8 usb: hub: Allow reset retry for USB2 devices on connect bounce
+6e500be usb: quirks: add quirk for WORLDE MINI MIDI keyboard
+d3d493c usb: cdc_acm: Add quirk for Elatec TWN3
+7238612 USB: serial: metro-usb: add MS7820 device id
+7c1c88e USB: core: fix out-of-bounds access bug in usb_get_bos_descriptor()
+d9fbd49 USB: devio: Revert "USB: devio: Don't corrupt user memory"
+6f45781 Linux 3.18.77
+3cde552 Revert "tty: goldfish: Fix a parameter of a call to free_irq"
+e524bfa target/iscsi: Fix unsolicited data seq_end_offset calculation
+1405b8e uapi: fix linux/mroute6.h userspace compilation errors
+d090846 uapi: fix linux/rds.h userspace compilation errors
+ffc669a scsi: scsi_dh_emc: return success in clariion_std_inquiry()
+b370a03 ocfs2/dlmglue: prepare tracking logic to avoid recursive cluster lock
+7cab726 crypto: xts - Add ECB dependency
+bcd1706 net/mlx4_core: Fix VF overwrite of module param which disables DMFS on new probed PFs
+2d9e4b5 Btrfs: send, fix failure to rename top level inode due to name collision
+21bf570 iio: adc: xilinx: Fix error handling
+9a50437 netfilter: nf_ct_expect: Change __nf_ct_expect_check() return value.
+ef04231 irqchip/crossbar: Fix incorrect type of local variables
+5961ade watchdog: kempld: fix gcc-4.3 build
+9811990 locking/lockdep: Add nest_lock integrity test
+4a8a916 Revert "bsg-lib: don't free job in bsg_prepare_job"
+bc8a5a4 net: Set sk_prot_creator when cloning sockets to the right proto
+b076390 packet: in packet_do_bind, test fanout with bind_lock held
+5eaafe6 l2tp: fix race condition in l2tp_tunnel_delete
+88db37f l2tp: Avoid schedule while atomic in exit_net
+6132b4f vti: fix use after free in vti_tunnel_xmit/vti6_tnl_xmit
+ba554fc isdn/i4l: fetch the ppp_write buffer in one shot
+e4ffdf9 packet: hold bind lock when rebinding to fanout hook
+63692f8 bpf/verifier: reject BPF_ALU64|BPF_END
+db27397 sctp: potential read out of bounds in sctp_ulpevent_type_enabled()
+1512129 ext4: avoid deadlock when expanding inode size
+9b7e3d7 drm/dp/mst: save vcpi with payloads
+608c308 x86/mm: Disable preemption during CR3 read+write
+1e8e6b3 Linux 3.18.76
+cbe4d8c Revert "usb: gadget: inode.c: fix unbalanced spin_lock in ep0_write"
+954e2ed ALSA: seq: Fix missing NULL check at remove_events ioctl
+8ae04f6 USB: serial: console: fix use-after-free after failed setup
+2d0ffe4 USB: serial: qcserial: add Dell DW5818, DW5819
+740ffa1 USB: serial: option: add support for TP-Link LTE module
+704e5f0 USB: serial: cp210x: add support for ELV TFD500
+d7795bf fix unbalanced page refcounting in bio_map_user_iov
+2159252 direct-io: Prevent NULL pointer access in submit_page_section
+a2b295d usb: gadget: composite: Fix use-after-free in usb_composite_overwrite_options
+c57f813 ALSA: caiaq: Fix stray URB at probe error path
+f12baf7 ALSA: seq: Fix copy_from_user() call inside lock
+035e6d0 ALSA: seq: Fix use-after-free at creating a port
+9d263db ALSA: usb-audio: Kill stray URB at exiting
+4207aad iommu/amd: Finish TLB flush in amd_iommu_unmap()
+2b15a69 usb: renesas_usbhs: Fix DMAC sequence for receiving zero-length packet
+e4a25d3 KVM: nVMX: fix guest CR4 loading when emulating L2 to L1 exit
+43c9d79 crypto: shash - Fix zero-length shash ahash digest crash
+f4cf5d7 HID: usbhid: fix out-of-bounds bug
+f74c7fb CIFS: Reconnect expired SMB sessions
+6d1c3f7 ext4: in ext4_seek_{hole,data}, return -ENXIO for negative offsets
+3e2bb7d Linux 3.18.75
+b7ff160 ext4: fix fencepost in s_first_meta_bg validation
+2ce649f ext4: validate s_first_meta_bg at mount time
+79012f0 ext4: Don't clear SGID when inheriting ACLs
+5ca606a ext4: fix data corruption for mmap writes
+7798893 fs/super.c: fix race between freeze_super() and thaw_super()
+9d3562b ext4: only call ext4_truncate when size <= isize
+f5a35eb drm/i915/bios: ignore HDMI on port A
+884d512 HID: i2c-hid: allocate hid buffers for real worst case
+389721f driver core: platform: Don't read past the end of "driver_override" buffer
+e29b612 ALSA: usx2y: Suppress kernel warning at page allocation failures
+c52be88 lsm: fix smack_inode_removexattr and xattr_getsecurity memleak
+fce8db2 uwb: ensure that endpoint is interrupt
+4a8d502 uwb: properly check kthread_run return value
+6fd03e4 iio: adc: mcp320x: Fix oops on module unload
+85a14a6 iio: ad7793: Fix the serial interface reset
+e1087d2 iio: core: Return error for failed read_reg
+923f18a staging: iio: ad7192: Fix - use the dedicated reset function avoiding dma from stack.
+440edb7 iio: ad_sigma_delta: Implement a dedicated reset function
+9a7370b xhci: fix finding correct bus_state structure for USB 3.1 hosts
+0502bf5 USB: fix out-of-bounds in usb_set_configuration
+8c7124a usb: Increase quirk delay for USB devices
+8f0a770 USB: uas: fix bug in handling of alternate settings
+d555674 USB: devio: Don't corrupt user memory
+36283d6 USB: dummy-hcd: fix infinite-loop resubmission bug
+f47d402 USB: dummy-hcd: fix connection failures (wrong speed)
+4b01fca usb: pci-quirks.c: Corrected timeout values used in handshake
+ee44ff5 ALSA: usb-audio: Check out-of-bounds access by corrupted buffer descriptor
+be8077a usb: renesas_usbhs: fix usbhsf_fifo_clear() for RX direction
+9857894 usb: renesas_usbhs: fix the BCLR setting condition for non-DCP pipe
+c57e557 usb-storage: unusual_devs entry to fix write-access regression for Seagate external drives
+59bf5c2 USB: gadgetfs: fix copy_to_user while holding spinlock
+c2b87de USB: gadgetfs: Fix crash caused by inadequate synchronization
+abb540b usb: gadget: inode.c: fix unbalanced spin_lock in ep0_write
+ac00583 Linux 3.18.74
+703937f mpi: Fix NULL ptr dereference in mpi_powm() [ver #3]
+36c84b2 crypto: algif_skcipher - Load TX SG list after waiting
+9d5012d staging: nvec: remove duplicated const
+9c4ae8f ttpci: address stringop overflow warning
+0cd9a46 ALSA: au88x0: avoid theoretical uninitialized access
+e288325 IB/qib: fix false-postive maybe-uninitialized warning
+b8710e2 libata: transport: Remove circular dependency at free time
+c910372 xfs: remove kmem_zalloc_greedy
+d0bd573 md/raid10: submit bio directly to replacement disk
+75a12b2 rds: ib: add error handle
+22126c6 parisc: perf: Fix potential NULL pointer dereference
+0a1b807 netfilter: nfnl_cthelper: fix incorrect helper->expect_class_max
+b05c24d exynos-gsc: Do not swap cb/cr for semi planar formats
+c8cab6f netfilter: invoke synchronize_rcu after set the _hook_ to NULL
+0fe19e5 mmc: sdio: fix alignment issue in struct sdio_func
+0ee6c8e usb: plusb: Add support for PL-27A1
+eafffc0 team: fix memory leaks
+fbbb384 net/packet: check length in getsockopt() called with PACKET_HDRLEN
+1728786 net: core: Prevent from dereferencing null pointer when releasing SKB
+4c963ef audit: log 32-bit socketcalls
+40e63fb partitions/efi: Fix integer overflow in GPT size calculation
+61e43da USB: serial: mos7840: fix control-message error handling
+920027f USB: serial: mos7720: fix control-message error handling
+7e4194e IB/ipoib: Replace list_del of the neigh->list with list_del_init
+8d8a5bb IB/ipoib: rtnl_unlock can not come after free_netdev
+6fc261c IB/ipoib: Fix deadlock over vlan_mutex
+0961072 tty: goldfish: Fix a parameter of a call to free_irq
+8c28f32 ARM: 8635/1: nommu: allow enabling REMAP_VECTORS_TO_RAM
+f905dad hwmon: (gl520sm) Fix overflows and crash seen when writing into limit attributes
+ff0377a sh_eth: use correct name for ECMR_MPDE bit
+9ff3b35 MIPS: Ensure bss section ends on a long-aligned address
+23e5fd9 RDS: RDMA: Fix the composite message user notification
+523a387 drm: bridge: add DT bindings for TI ths8135
+ffc97d4 Linux 3.18.73
+376c6f6 fix xen_swiotlb_dma_mmap prototype
+bc9f686 swiotlb-xen: implement xen_swiotlb_dma_mmap callback
+2d53f0b video: fbdev: aty: do not leak uninitialized padding in clk to userspace
+f23ec06 x86/fpu: Don't let userspace set bogus xcomp_bv
+5401256 btrfs: prevent to set invalid default subvolid
+0544aab PCI: Fix race condition with driver_override
+6ad7463 kvm: nVMX: Don't allow L2 to access the hardware CR8
+6528968 arm64: Make sure SPsel is always set
+d910040 bsg-lib: don't free job in bsg_prepare_job
+65e3664 nl80211: check for the required netlink attributes presence
+9f119f5 vfs: Return -ENXIO for negative SEEK_HOLE / SEEK_DATA offsets
+64304f5 SMB3: Don't ignore O_SYNC/O_DSYNC and O_DIRECT flags
+b3c1243 SMB: Validate negotiate (to protect against downgrade) even if signing off
+b93beca powerpc/pseries: Fix parent_dn reference leak in add_dt_node()
+6ea8051 KEYS: prevent KEYCTL_READ on negative key
+e3b663b KEYS: prevent creating a different user's keyrings
+50f17a4 KEYS: fix writing past end of user-supplied buffer in keyring_read()
+2d9db72 crypto: talitos - fix sha224
+fec4cd3 scsi: scsi_transport_iscsi: fix the issue that iscsi_if_rx doesn't parse nlmsg properly
+5806124 tracing: Erase irqsoff trace with empty write
+8923bf7 tracing: Fix trace_pipe behavior for instance traces
+9b9ce74 KVM: PPC: Book3S: Fix race and leak in kvm_vm_ioctl_create_spapr_tce()
+998173c mac80211: flush hw_roc_start work before cancelling the ROC
+456bbdc cifs: release auth_key.response for reconnect.
+0c31775 cifs: release cifs root_cred after exit_cifs
+0e13335 Linux 3.18.72
+0aad447 bcache: fix bch_hprint crash and improve output
+50aee96 bcache: fix for gc and write-back race
+c04dc90 bcache: Correct return value for sysfs attach errors
+0b312f81d bcache: correct cache_dirty_target in __update_writeback_rate()
+615f8ab bcache: Fix leak of bdev reference
+cfa0386 bcache: initialize dirty stripes in flash_dev_run()
+15ac059 media: uvcvideo: Prevent heap overflow when accessing mapped controls
+6b3412f media: v4l2-compat-ioctl32: Fix timespec conversion
+19b86cde PCI: shpchp: Enable bridge bus mastering if MSI is enabled
+13bbb82 ARC: Re-enable MMU upon Machine Check exception
+88645cf3 tracing: Apply trace_clock changes to instance max buffer
+45a521c ftrace: Fix selftest goto location on error
+78d8864 scsi: qla2xxx: Fix an integer overflow in sysfs code
+9793679 scsi: sg: fixup infoleak when using SG_GET_REQUEST_TABLE
+691e12d scsi: sg: factor out sg_fill_request_table()
+9f8cb7b scsi: sg: off by one in sg_ioctl()
+a19e985 scsi: sg: use standard lists for sg_requests
+53a5b21 scsi: sg: remove 'save_scat_len'
+9f58284 scsi: zfcp: trace high part of "new" 64 bit SCSI LUN
+bb5d529 scsi: zfcp: trace HBA FSF response by default on dismiss or timedout late response
+2a30f9d scsi: zfcp: fix payload with full FCP_RSP IU in SCSI trace records
+277958c scsi: zfcp: fix missing trace records for early returns in TMF eh handlers
+9799a4d scsi: zfcp: add handling for FCP_RESID_OVER to the fcp ingress path
+ad385a7 scsi: zfcp: fix queuecommand for scsi_eh commands when DIX enabled
+2e41a42 skd: Submit requests to firmware before triggering the doorbell
+3070df3 skd: Avoid that module unloading triggers a use-after-free
+1074b91 md/bitmap: disable bitmap_resize for file-backed bitmaps.
+617f119 block: Relax a check in blk_start_queue()
+87e4774 powerpc: Fix DAR reporting when alignment handler faults
+ab1717d ext4: fix incorrect quotaoff if the quota feature is enabled
+1d4ba7f crypto: AF_ALG - remove SGL terminator indicator when chaining
+a6d09b8 Input: i8042 - add Gigabyte P57 to the keyboard reset table
+53c9435 ip6_gre: fix endianness errors in ip6gre_err
+c844392 Revert "usb: musb: fix tx fifo flush handling again"
+70768be f2fs: check hot_data for roll-forward recovery
+4c97e1c ipv6: fix typo in fib6_net_exit()
+fbca27a ipv6: fix memory leak with multiple tables during netns destruction
+1722ca9 tcp: initialize rcv_mss to TCP_MIN_MSS instead of 0
+39194a4 Revert "net: phy: Correctly process PHY_HALTED in phy_stop_machine()"
+fea532e qlge: avoid memcpy buffer overflow
+51ef0b6 ipv6: accept 64k - 1 packet length in ip6_find_1stfragopt()
+60a8261 Linux 3.18.71
+b766f08 xfs: XFS_IS_REALTIME_INODE() should be false if no rt device present
+43d5181 ARM: 8692/1: mm: abort uaccess retries upon fatal signal
+090aa46 Bluetooth: Properly check L2CAP config option output buffer length
+bceac10 ALSA: msnd: Optimize / harden DSP and MIDI loops
+8e7e643 locktorture: Fix potential memory leak with rw lock test
+b66950d btrfs: resume qgroup rescan on rw remount
+19011e6 scsi: sg: recheck MMAP_IO request length with lock held
+57923c9 scsi: sg: protect against races between mmap() and SG_SET_RESERVED_SIZE
+61b491f cs5536: add support for IDE controller variant
+18f9ff5 workqueue: Fix flag collision
+e7023d1 cma: fix calculation of aligned offset
+fcd5675 dlm: avoid double-free on error path in dlm_device_{register,unregister}
+524386e Input: trackpoint - assume 3 buttons when buttons detection fails
+2c97bb6 driver core: bus: Fix a potential double free
+158333a staging/rts5208: fix incorrect shift to extract upper nybble
+d512a57 USB: core: Avoid race of async_completed() w/ usbdev_release()
+7d68769 usb:xhci:Fix regression when ATI chipsets detected
+f638d31 usb: Add device quirk for Logitech HD Pro Webcam C920-C
+f396fe5 USB: serial: option: add support for D-Link DWM-157 C1
+d70662e usb: quirks: add delay init quirk for Corsair Strafe RGB keyboard
+1e0d287 Linux 3.18.70
+c54625c epoll: fix race between ep_poll_callback(POLLFREE) and ep_free()/ep_remove()
+eed3054 drm/ttm: Fix accounting error when fail to get pages for pool
+0d40001 xfrm: policy: check policy direction value
+cefe444 wl1251: add a missing spin_lock_init()
+447be15 CIFS: remove endian related sparse warning
+79c2232 CIFS: Fix maximum SMB2 header size
+9b5ae8b cpumask: fix spurious cpumask_of_node() on non-NUMA multi-node configs
+25bd5a5 i2c: ismt: Return EMSGSIZE for block reads with bogus length
+5b6cfd5 i2c: ismt: Don't duplicate the receive length for block reads
+e52da34 Linux 3.18.69
+19f0761 scsi: sg: reset 'res_in_use' after unlinking reserved array
+cf0734d scsi: sg: protect accesses to 'reserved' page array
+7d58fc7 clk: si5351: Constify clock names and struct regmap_config
+b82e2aa x86/tools: Fix gcc-7 warning in relocs.c
+edb9d2d x86-64: Handle PC-relative relocations on per-CPU data
+67038f9 arm64: fpsimd: Prevent registers leaking across exec
+f5b150b arm64: flush FP/SIMD state correctly after execve()
+f2888dd x86/io: Add "memory" clobber to insb/insw/insl/outsb/outsw/outsl
+f0c8d93 mm: cma: fix incorrect type conversion for size during dma allocation
+30a8474 mm: cma: constify and use correct signness in mm/cma.c
+97f9df9 mm: cma: fix CMA aligned offset calculation
+09cdf69 mm: cma: fix totalcma_pages to include DT defined CMA regions
+b18dd1f mm: cma: split cma-reserved in dmesg log
+feb52e7 mm/cma: make kmemleak ignore CMA regions
+3c61cc0 mm: cma: align to physical address, not CMA region position
+fa69da4 lib: bitmap: add alignment offset for bitmap_find_next_zero_area()
+9988d69 arm64: mm: abort uaccess retries upon fatal signal
+752cc3c p54: memset(0) whole array
+a7049cd gcov: support GCC 7.1
+42b7c43 gcov: add support for gcc version >= 6
+6b1e352 gcov: add support for GCC 5.1
+6874179 ALSA: au88x0: Fix zero clear of stream->resources
+8df2514 scsi: isci: avoid array subscript warning
+2713f9f Linux 3.18.68
+2c3accf ACPI / APEI: Add missing synchronize_rcu() on NOTIFY_SCI removal
+9bfdf6b staging: rtl8188eu: add RNX-N150NUB support
+0647d12 iio: imu: adis16480: Fix acceleration scale factor for adis16480
+8000711 Bluetooth: bnep: fix possible might sleep error in bnep_session
+a17886b Bluetooth: cmtp: fix possible might sleep error in cmtp_session
+81baf8c Bluetooth: hidp: fix possible might sleep error in hidp_session_thread
+d5255d9 perf/core: Fix group {cpu,task} validation
+a2a7cf0 nfsd: Limit end of page list when decoding NFSv4 WRITE
+5ff5bac cifs: return ENAMETOOLONG for overlong names in cifs_open()/cifs_lookup()
+04c9392 cifs: Fix df output for users with quota limits
+5dd7885 tracing: Fix freeing of filter in create_filter() when set_str is false
+d3f4c19 drm: Release driver tracking before making the object available again
+e3d62b2 ALSA: hda - Add stereo mic quirk for Lenovo G50-70 (17aa:3978)
+639ea02 ALSA: core: Fix unexpected error at replacing user TLV
+ea20526 Input: trackpoint - add new trackpoint firmware ID
+4eebc90 net_sched: fix order of queue length updates in qdisc_replace()
+28ae858 net: sched: fix NULL pointer dereference when action calls some targets
+69e12f8 irda: do not leak initialized list.dev to userspace
+8621be0 tcp: when rearming RTO, if RTO time is in past then fire RTO ASAP
+82bd555 sctp: fully initialize the IPv6 address in sctp_v6_to_addr()
+e96bad7 dccp: defer ccid_hc_tx_delete() at dismantle time
+a9b7f06 dccp: purge write queue in dccp_destroy_sock()
+25efe5c Linux 3.18.67
+ae0ead2 usb: qmi_wwan: add D-Link DWM-222 device ID
+63407c4 pids: make task_tgid_nr_ns() safe
+8cf9500 Sanitize 'move_pages()' permission checks
+165f22a irqchip/atmel-aic: Fix unbalanced refcount in aic_common_rtc_irq_fixup()
+ce76d8b irqchip/atmel-aic: Fix unbalanced of_node_put() in aic_common_irq_fixup()
+d5a76b2 mm/mempolicy: fix use after free when calling get_mempolicy
+f1bfa63 ALSA: usb-audio: Apply sample rate quirk to Sennheiser headset
+014e673 parisc: pci memory bar assignment fails with 64bit kernels on dino/cujo
+dc7a0ac audit: Fix use after free in audit_remove_watch_rule()
+5776984 netfilter: nf_ct_ext: fix possible panic after nf_ct_extend_unregister
