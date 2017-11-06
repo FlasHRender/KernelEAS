@@ -1380,7 +1380,7 @@ void set_task_cpu(struct task_struct *p, unsigned int new_cpu)
 		if (p->sched_class->migrate_task_rq)
 			p->sched_class->migrate_task_rq(p, new_cpu);
 		p->se.nr_migrations++;
-		perf_sw_event(PERF_COUNT_SW_CPU_MIGRATIONS, 1, NULL, 0);
+		perf_sw_event_sched(PERF_COUNT_SW_CPU_MIGRATIONS, 1, 0);
 
 		walt_fixup_busy_time(p, new_cpu);
 	}
@@ -2008,6 +2008,28 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	success = 1; /* we're going to change ->state */
 	cpu = task_cpu(p);
 
+	/*
+	 * Ensure we load p->on_rq _after_ p->state, otherwise it would
+	 * be possible to, falsely, observe p->on_rq == 0 and get stuck
+	 * in smp_cond_load_acquire() below.
+	 *
+	 * sched_ttwu_pending()                 try_to_wake_up()
+	 *   [S] p->on_rq = 1;                  [L] P->state
+	 *       UNLOCK rq->lock  -----.
+	 *                              \
+	 *				 +---   RMB
+	 * schedule()                   /
+	 *       LOCK rq->lock    -----'
+	 *       UNLOCK rq->lock
+	 *
+	 * [task p]
+	 *   [S] p->state = UNINTERRUPTIBLE     [L] p->on_rq
+	 *
+	 * Pairs with the UNLOCK+LOCK on rq->lock from the
+	 * last wakeup of our task and the schedule that got our task
+	 * current.
+	 */
+	smp_rmb();
 	if (p->on_rq && ttwu_remote(p, wake_flags))
 		goto stat;
 
@@ -3144,7 +3166,7 @@ static noinline void __schedule_bug(struct task_struct *prev)
 static inline void schedule_debug(struct task_struct *prev)
 {
 #ifdef CONFIG_SCHED_STACK_END_CHECK
-	if (unlikely(task_stack_end_corrupted(prev)))
+	if (task_stack_end_corrupted(prev))
 		panic("corrupted stack end detected inside scheduler\n");
 #endif
 	/*
@@ -4510,21 +4532,12 @@ out_unlock:
 	return retval;
 }
 
-int affinity_on = 0;
-int affinity_core = 2;
-#define BG_FG_POLICY 0xfffc
-#define TOP_POLICY 0xfffd
-long sched_setaffinity(pid_t pid, struct cpumask *in_mask)
+long sched_setaffinity(pid_t pid, const struct cpumask *in_mask)
 {
 	cpumask_var_t cpus_allowed, new_mask;
 	struct task_struct *p;
 	int retval;
 
-    int ams_flag = 0;
-    if(pid & 0x80000000){
-        pid = pid & 0x7fffffff;
-        ams_flag = 1;
-    }
 	rcu_read_lock();
 
 	p = find_process_by_pid(pid);
@@ -4532,23 +4545,6 @@ long sched_setaffinity(pid_t pid, struct cpumask *in_mask)
 		rcu_read_unlock();
 		return -ESRCH;
 	}
-
-    if(ams_flag){
-        if(cpumask_test_cpu(3, in_mask))
-            p->ams_policy = TOP_POLICY;
-        else
-            p->ams_policy = BG_FG_POLICY;
-        if(!affinity_on && !cpumask_test_cpu(3, in_mask)){
-            rcu_read_unlock();
-            return 0;
-        }
-        if(affinity_core > 0 && !cpumask_test_cpu(3, in_mask)){
-            int i;
-            cpumask_clear(in_mask);
-            for(i = 0; i < affinity_core; i++)
-                cpumask_set_cpu(i, in_mask);
-        }
-    }
 
 	/* Prevent p going away */
 	get_task_struct(p);
@@ -4567,9 +4563,6 @@ long sched_setaffinity(pid_t pid, struct cpumask *in_mask)
 		goto out_free_cpus_allowed;
 	}
 	retval = -EPERM;
-    if(!memcmp(current->comm, "thermal-engine", 12))
-        goto direct_set;
-
 	if (!check_same_owner(p)) {
 		rcu_read_lock();
 		if (!ns_capable(__task_cred(p)->user_ns, CAP_SYS_NICE)) {
@@ -4627,78 +4620,6 @@ out_put_task:
 	put_task_struct(p);
 	return retval;
 }
-
-
-static LIST_HEAD(affility_list);
-
-void process_affinity(int on)
-{
-    struct task_struct *g, *p;
-    struct cpumask limit_mask;
-    struct cpumask unlimit_mask;
-    const struct cpumask* msk;
-    int i;
-    cpumask_setall(&limit_mask);
-    cpumask_setall(&unlimit_mask);
-    if(affinity_core > 0){
-        cpumask_clear(&limit_mask);
-        for(i = 0; i < affinity_core; i++)
-            cpumask_set_cpu(i, &limit_mask);
-    }
-    if(on){
-        msk = &limit_mask;
-    	read_lock(&tasklist_lock);
-    	do_each_thread(g, p) {
-    		if(p->ams_policy == BG_FG_POLICY)
-                //sched_setaffinity(p->pid, &limit_mask);
-                list_add(&p->affinity_node, &affility_list);
-    	}  while_each_thread(g, p);
-    	read_unlock(&tasklist_lock);
-        while(!list_empty(&affility_list)){
-            p = list_first_entry(&affility_list, struct task_struct, affinity_node);
-            list_del_init(&p->affinity_node);
-            sched_setaffinity(p->pid, &limit_mask);
-        }
-    }
-    else{
-        msk = &unlimit_mask;
-        read_lock(&tasklist_lock);
-	    do_each_thread(g, p) {
-		    if(p->ams_policy == BG_FG_POLICY)
-                //sched_setaffinity(p->pid, &unlimit_mask);
-                list_add(&p->affinity_node, &affility_list);
-	    }  while_each_thread(g, p);
-	    read_unlock(&tasklist_lock);
-        while(!list_empty(&affility_list)){
-            p = list_first_entry(&affility_list, struct task_struct, affinity_node);
-            list_del_init(&p->affinity_node);
-            sched_setaffinity(p->pid, &unlimit_mask);
-        }
-    }
-    BUG_ON(!list_empty(&affility_list));
-}
-
-int affinity_switch_handler(struct ctl_table *table, int write,
-            void __user *buffer, size_t *lenp,
-            loff_t *ppos)
-{
-    int *buf = buffer;
-    affinity_on = buf[0];
-    process_affinity(affinity_on);
-    return 0;
-}
-
-int affinity_core_handler(struct ctl_table *table, int write,
-            void __user *buffer, size_t *lenp,
-            loff_t *ppos)
-{
-    int *buf = buffer;
-    affinity_core = buf[0];
-    if(affinity_on)
-        process_affinity(affinity_on);
-    return 0;
-}
-
 
 static int get_user_cpu_mask(unsigned long __user *user_mask_ptr, unsigned len,
 			     struct cpumask *new_mask)
@@ -5168,13 +5089,15 @@ void show_state_filter(unsigned long state_filter)
 		/*
 		 * reset the NMI-timeout, listing all files on a slow
 		 * console might take a lot of time:
+		 * Also, reset softlockup watchdogs on all CPUs, because
+		 * another CPU might be blocked waiting for us to process
+		 * an IPI.
 		 */
 		touch_nmi_watchdog();
+		touch_all_softlockup_watchdogs();
 		if (!state_filter || (p->state & state_filter))
 			sched_show_task(p);
 	}
-
-	touch_all_softlockup_watchdogs();
 
 #ifdef CONFIG_SCHED_DEBUG
 	sysrq_sched_debug_show();
