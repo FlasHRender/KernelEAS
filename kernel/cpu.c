@@ -190,14 +190,14 @@ void cpu_hotplug_done(void)
 void cpu_hotplug_disable(void)
 {
 	cpu_maps_update_begin();
-	cpu_hotplug_disabled++;
+	cpu_hotplug_disabled = 1;
 	cpu_maps_update_done();
 }
 
 void cpu_hotplug_enable(void)
 {
 	cpu_maps_update_begin();
-	WARN_ON(--cpu_hotplug_disabled < 0);
+	cpu_hotplug_disabled = 0;
 	cpu_maps_update_done();
 }
 
@@ -556,7 +556,6 @@ int disable_nonboot_cpus(void)
 	 * with the userspace trying to use the CPU hotplug at the same time
 	 */
 	cpumask_clear(frozen_cpus);
-	sched_set_boost(0);//Wujialong 20160314 disable sched_boost when going to sleep
 	pr_debug("Disabling non-boot CPUs ...\n");
 	for_each_online_cpu(cpu) {
 		if (cpu == first_cpu)
@@ -603,7 +602,7 @@ void __ref enable_nonboot_cpus(void)
 
 	/* Allow everyone to use the CPU hotplug again */
 	cpu_maps_update_begin();
-	WARN_ON(--cpu_hotplug_disabled < 0);
+	cpu_hotplug_disabled = 0;
 	if (cpumask_empty(frozen_cpus))
 		goto out;
 
