@@ -136,7 +136,8 @@ unsigned int sysctl_sched_cfs_bandwidth_slice = 5000UL;
  * The margin used when comparing utilization with CPU capacity:
  * util * margin < capacity * 1024
  */
-unsigned int capacity_margin = 1280; /* ~20% */
+#define SCHED_CAPACITY_MARGIN 1280
+unsigned int capacity_margin = SCHED_CAPACITY_MARGIN; /* ~20% */
 
 static inline void update_load_add(struct load_weight *lw, unsigned long inc)
 {
@@ -2930,7 +2931,7 @@ static inline void update_load_avg(struct sched_entity *se, int flags)
 
 	decayed = update_cfs_rq_load_avg(now, cfs_rq, true);
 
-	decayed |= propagate_entity_load_avg(se);ß
+	decayed |= propagate_entity_load_avg(se);
 
 	if (decayed && (flags & UPDATE_TG))
 		update_tg_load_avg(cfs_rq, 0);
@@ -5562,17 +5563,13 @@ static inline unsigned long task_util(struct task_struct *p)
 	return p->se.avg.util_avg;
 }
 
-
-unsigned int capacity_margin = 1280; /* ~20% margin */
-
 static inline unsigned long boosted_task_util(struct task_struct *task);
-
 
 static inline bool __task_fits(struct task_struct *p, int cpu, int util)
 {
 	unsigned long capacity = capacity_of(cpu);
 
-	util += task_util(p);
+	util += boosted_task_util(p);
 
 	return (capacity * 1024) > (util * capacity_margin);
 }
@@ -6112,6 +6109,34 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 				best_active_cpu = i;
 				continue;
 			}
+
+			/*
+			 * Enforce EAS mode
+			 *
+			 * For non latency sensitive tasks, skip CPUs that
+			 * will be overutilized by moving the task there.
+			 *
+			 * The goal here is to remain in EAS mode as long as
+			 * possible at least for !prefer_idle tasks.
+			 */
+			if ((new_util * migration_capacity_margin) >
+				(capacity_orig * SCHED_CAPACITY_SCALE)) {
+				continue;
+			}
+
+			/*
+			 * Enforce energy_diff
+			 *
+			 * For non latency sensitive tasks, skip the task's
+			 * previous CPU.
+			 *
+			 * The goal here is to try hard to find another
+			 * possible candidate and use energy_diff to find out
+			 * if it's more energy efficient to move the task
+			 * there.
+			 */
+			if (i == prev_cpu)
+				continue;
 
 			/*
 			 * Case B) Non latency sensitive tasks on IDLE CPUs.
