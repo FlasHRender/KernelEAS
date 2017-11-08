@@ -404,7 +404,6 @@ KBUILD_CFLAGS   := -Werror -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-maybe-uninitialized \
-		   -Wno-error=tautological-compare \
 		   -Wno-format-security \
 		   -std=gnu89
 
